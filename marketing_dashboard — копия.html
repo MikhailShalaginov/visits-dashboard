@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика Визитов</title>
+    <!-- Базовые стили (можете добавить свои или CSS фреймворк) -->
+<style>
+body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    margin: 0;
+    background: linear-gradient(120deg, #ecf7fb 25%, #f6f7fa 100%);
+    min-height: 100vh;
+}
+/* Заголовки */
+h1 {
+    color: #2877b6;
+    letter-spacing: 0.01em;
+    margin: 24px 0 10px 12px;
+    font-weight: 700;
+    font-size: 2.2em;
+    text-shadow: 0 2px 8px #ffffff90;
+}
+h2 {
+    color: #237cd7;
+    margin-top: 0;
+    font-size: 1.15em;
+    border-bottom: 1px solid #e4f0fa;
+    padding-bottom: 4px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 28px;
+    margin: 24px 0 24px 0;
+    width: 100%;
+    max-width: 1800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.chart-container {
+    background: #fffdfc;
+    padding: 22px 20px 15px 22px;
+    border-radius: 22px;
+    box-shadow: 0 8px 32px 0 #87ccec13, 0 1.5px 7px #ccecff26;
+    min-height: 350px;
+    border: 1.5px solid #ebf5fb;
+    transition: box-shadow .19s;
+}
+.chart-container:hover {
+    box-shadow: 0 12px 40px 0 #b8dff930, 0 3px 14px #40c1ff22;
+}
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    gap: 22px;
+    margin-bottom: 30px;
+    margin-left: 4px;
+}
+.kpi-card {
+    background: linear-gradient(120deg, #eaf5ff 91%, #fff1e7 120%);
+    border: none;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 2.5px 14px #93cafc22;
+    min-height: 124px;
+    cursor: pointer;
+    padding: 14px 10px 10px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background 0.22s, transform 0.18s, box-shadow 0.14s;
+    outline: none;
+    position: relative;
+}
+.kpi-card:hover, .kpi-card:focus {
+    background: linear-gradient(120deg, #d2e9fa 80%, #ffe2c7 120%);
+    transform: translateY(-2px) scale(1.029);
+    z-index: 2;
+    box-shadow: 0 8px 24px #b4e6fd3a, 0 1.5px 11px #ffdda046;
+}
+.kpi-active {
+    background: linear-gradient(120deg, #cbe1ff 31%, #ffe5c3 120%);
+    border: 2.5px solid #53baf8;
+    box-shadow: 0 0 0 3px #fff9ef, 0 2px 16px #2ea7f54a;
+}
+.kpi-name {
+    font-size: 1em;
+    color: #3584c6;
+    text-shadow: 0 1px 6px #fff6;
+    margin-bottom: 6px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+.kpi-main {
+    font-size: 1.47em;
+    font-weight: bold;
+    color: #275a81;
+    margin-bottom: 2px;
+    letter-spacing: 0.02em;
+}
+.kpi-compare {
+    font-size: 0.93em;
+    margin-top: 5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+.kpi-compare[style*="green"]   { color: #21ad6e !important; }
+.kpi-compare[style*="red"]     { color: #e05a45 !important; }
+.kpi-compare[style*="grey"]    { color: #bbbbbb !important; }
+.kpi-help {
+    font-size: 0.77em;
+    color: #83bfff;
+    margin-top: 8px;
+    font-style: italic;
+    word-break: break-word;
+    line-height: 1.15em;
+}
+/* Фильтры и контроллы */
+.controls {
+    margin: 28px 0 38px 0;
+    background: linear-gradient(110deg, #e4f4fd 70%, #ffe9ca 100%);
+    padding: 20px 26px 7px 26px;
+    border-radius: 17px;
+    box-shadow: 0 6px 30px #67b9ff15;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: flex-end;
+    border: 1px solid #e4f0fa;
+    max-width: 1800px;
+    margin-left: auto; margin-right: auto;
+}
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.control-group label {
+    font-size: 0.97em;
+    font-weight: 600;
+    color: #297eaf;
+    margin-bottom: 1px;
+}
+.control-group select, .control-group input[type="file"] {
+    padding: 6px 10px;
+    border: 1.5px solid #cbe8fb;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 1em;
+    transition: border-color .18s;
+    min-width: 120px;
+    max-width: 330px;
+    outline: none;
+}
+.control-group select:focus, .control-group input[type="file"]:focus {
+    border-color: #25a9e0;
+}
+.control-group fieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+.control-group input[type="radio"] {
+    accent-color: #25a9e0;
+    transform: scale(1.10);
+    margin-right: 6px;
+}
+#uploadStatus {
+    font-size: 0.96em;
+    color: #368bd7;
+    margin-left: auto;
+    padding-left: 4vw;
+    font-style: italic;
+}
+/* Плейсхолдер пустых данных */
+.empty-warn {
+    color: #b1acb6;
+    text-align: center;
+    padding: 26px 8px 18px;
+    font-style: italic;
+    background: none;
+    font-size: 1em;
+}
+/* Plotly legend -- чтобы не мешалась врезке */
+.js-plotly-plot .legend {
+    background: #fffefedd !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 14px #cbdae412;
+    padding: 5px 9px 5px 11px !important;
+}
+/* Plotly: плавнее */
+.js-plotly-plot .main-svg {
+    font-family: 'Segoe UI',Arial,sans-serif !important;
+}
+.js-plotly-plot .xaxislayer-above .xtick > text,
+.js-plotly-plot .yaxislayer-above .ytick > text {
+    font-size: 1.04em !important;
+}
+@media (max-width: 800px) {
+    .controls, .dashboard-grid { margin: 9px 2px !important; }
+    .controls { padding-left: 6px; padding-right: 6px; font-size: .98em; }
+    .dashboard-grid { gap: 12px; }
+    .kpi-cards { gap: 9px; }
+    h1 { font-size: 1.4em; margin-left: 3px; }
+    .chart-container { padding: 8px 2vw 8px 2vw; min-height: 170px; border-radius: 12px; }
+}
+::-webkit-scrollbar-thumb { background: #d1eafd; border-radius: 10px; }
+::-webkit-scrollbar-track { background: #f6f8fc; }
+::-webkit-scrollbar { width: 8px; }
+</style>
+
+    <!-- Загрузка библиотек -->
+    <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.8.3/simple-statistics.min.js"></script>
+
+</head>
+<body>
+
+<h1>Аналитика визитов</h1>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="fileInput">1. Загрузить файл (CSV/XLSX):</label>
+        <input type="file" id="fileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+    </div>
+     <div class="control-group">
+        <label for="monthFilter">2. Фильтр по месяцу:</label>
+        <select id="monthFilter" style="display: none;"></select>
+     </div>
+    <div class="control-group">
+         <label>3. Гранулярность:</label>
+         <fieldset>
+            <label><input type="radio" name="granularity" value="day" checked> День</label>
+            <label><input type="radio" name="granularity" value="week"> Неделя</label>
+            <label><input type="radio" name="granularity" value="month"> Месяц</label>
+         </fieldset>
+    </div>
+     <div class="control-group">
+        <label>4. Сравнение:</label>
+        <fieldset>
+            <label><input type="radio" name="compare" value="none" checked> Нет</label>
+            <label><input type="radio" name="compare" value="prev"> С периодом:</label>
+            <select id="comparePeriodSelect" style="display: none;" disabled></select>
+        </fieldset>
+    </div>
+    <div id="uploadStatus">Файл не загружен</div>
+</div>
+
+<h2>Ключевые показатели (KPI)</h2>
+<div id="kpi-cards">
+    <div class="empty-warn">Загрузите CSV/XLSX файл с данными...</div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="chart-container">
+        <h2>Динамика <span id="dynLabel">по дням</span></h2>
+        <div id="byDynamic"></div>
+        <div id="byDynamicSmooth" style="margin-top: 15px;"></div>
+    </div>
+    <div class="chart-container">
+        <h2>По источникам трафика</h2>
+        <div id="bySource"></div>
+    </div>
+    <div class="chart-container">
+        <h2>По дням недели</h2>
+        <div id="byWeekday"></div>
+    </div>
+</div>
+
+
+<script>
+// --- Конфигурация дашборда ---
+const metricMap = [
+    { col: "Визиты",           name: "Визиты", help:"Общее число сеансов" },
+    { col: "Посетители",       name: "Посетители", help:"Уникальные пользователи" },
+    { col: "Клики по товарам", name: "Клики по товарам", help:"Кол-во кликов на карточки"},
+    { col: "Просмотры товаров",name: "Просмотры товаров", help:"Кол-во просмотров страниц товаров"},
+    { col: "Товаров добавлено в корзину", name: "Добавлено в корзину", help:"Штук товаров добавлено"},
+    // { col: "Товаров удалено из корзины", name: "Удалено из корзины", help:"Штук товаров удалено"}, // Закомментировано, т.к. нет в expected_columns
+    { col: "Товаров куплено",  name: "Куплено товаров", help:"Штук товаров куплено"},
+    { col: "CR_VisitToPurchase", name: "CR (Визит->Покупка)", percent: true, calc: (r) => [(+r["Товаров куплено"]||0), (+r["Визиты"]||0)], help:"Куплено / Визиты" },
+    { col: "CR_ClickToPurchase", name: "CR (Клик->Покупка)", percent: true, calc: (r) => [(+r["Товаров куплено"]||0), (+r["Клики по товарам"]||0)], help:"Куплено / Клики по товарам" },
+    { col: "CR_ViewToAdd", name: "CR (Просмотр->Корзина)", percent: true, calc: (r) => [(+r["Товаров добавлено в корзину"]||0), (+r["Просмотры товаров"]||0)], help:"Добавлено / Просмотры" }
+];
+// Ожидаемые колонки (убираем 'Товаров удалено из корзины' для соответствия логам и metricMap)
+const expected_columns = [
+    "Месяц визита", "День месяца визита", "День недели визита",
+    "Источник трафика", "Визиты", "Посетители", "Клики по товарам", "Просмотры товаров",
+    "Товаров добавлено в корзину",
+    "Товаров куплено"
+];
+const nonNegativeMetrics = ["Визиты", "Посетители", "Клики по товарам", "Просмотры товаров", "Товаров добавлено в корзину", "Товаров куплено"];
+const weekdaysOrder = { "Понедельник": 1, "Вторник": 2, "Среда": 3, "Четверг": 4, "Пятница": 5, "Суббота": 6, "Воскресенье": 7 };
+const weekdaysShort = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+let dataRaw = [];
+let filteredData = [];
+let currentMetricCol = metricMap[0].col;
+let currentGran = 'day';
+let currentCompare = 'none';
+let selectedMonth = "";
+let selectedComparePeriod = "";
+
+// --- Инициализация и обработчики событий ---
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('fileInput').addEventListener('change', (e) => { handleFile(e.target.files[0]); });
+    document.querySelectorAll('input[name="granularity"]').forEach(el => {
+        el.onchange = () => {
+            currentGran = el.value;
+            document.getElementById('dynLabel').textContent = {day:"по дням", week:"по неделям", month:"по месяцам"}[currentGran];
+            updateComparePeriodSelector();
+            updateAllCharts();
+        };
+    });
+    document.querySelectorAll('input[name="compare"]').forEach(el => {
+        el.onchange = () => {
+            currentCompare = el.value;
+            const compareSelect = document.getElementById('comparePeriodSelect');
+            if (currentCompare === 'prev' && dataRaw.length > 0) {
+                compareSelect.style.display = '';
+                compareSelect.disabled = false;
+                updateComparePeriodSelector();
+            } else {
+                compareSelect.style.display = 'none';
+                compareSelect.disabled = true;
+                selectedComparePeriod = "";
+            }
+            updateAllCharts();
+        };
+    });
+    document.getElementById('comparePeriodSelect').onchange = (e) => {
+        selectedComparePeriod = e.target.value;
+        updateAllCharts();
+    };
+    document.getElementById('monthFilter').onchange = (e) => {
+        selectedMonth = e.target.value;
+        filterData();
+        updateAllCharts();
+    };
+    clearDashboard();
+});
+
+function clearDashboard() {
+    document.getElementById('kpi-cards').innerHTML = '<div class="empty-warn">Загрузите CSV/XLSX файл с данными...</div>';
+    document.getElementById('byDynamic').innerHTML = '';
+    document.getElementById('byDynamicSmooth').innerHTML = '';
+    document.getElementById('bySource').innerHTML = '';
+    document.getElementById('byWeekday').innerHTML = '';
+    document.getElementById('monthFilter').style.display = 'none';
+    document.getElementById('comparePeriodSelect').style.display = 'none';
+    document.getElementById("uploadStatus").textContent = "Файл не загружен";
+    dataRaw = []; filteredData = []; selectedMonth = ""; selectedComparePeriod = "";
+    document.querySelector('input[name="granularity"][value="day"]').checked = true;
+    document.querySelector('input[name="compare"][value="none"]').checked = true;
+    currentGran = 'day'; currentCompare = 'none';
+    document.getElementById('dynLabel').textContent = "по дням";
+    currentMetricCol = metricMap[0].col;
+}
+
+// --- Функции обработки данных ---
+
+function handleFile(file) {
+    if (!file) return;
+    clearDashboard();
+    document.getElementById("uploadStatus").textContent = "Чтение и обработка файла...";
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const rawFileData = e.target.result;
+        let jsonArr = [];
+
+        try {
+            const isCsv = file.name.toLowerCase().endsWith('.csv');
+            let workbook;
+
+            if (isCsv) {
+                console.log("Обнаружен CSV файл. Парсинг...");
+                let textToProcess = rawFileData;
+                if (!(typeof rawFileData === 'string')) {
+                     try {
+                         textToProcess = new TextDecoder("utf-8").decode(new Uint8Array(rawFileData));
+                         console.log("Файл декодирован как UTF-8.");
+                     } catch (decodeError) {
+                         console.warn("Не удалось декодировать как UTF-8, пробую как windows-1251...");
+                         try {
+                            textToProcess = new TextDecoder("windows-1251").decode(new Uint8Array(rawFileData));
+                            console.log("Файл декодирован как windows-1251.");
+                         } catch (fallbackError) {
+                             console.error("Ошибка декодирования файла CSV:", decodeError, fallbackError);
+                             throw new Error("Ошибка декодирования файла CSV. Не удалось определить кодировку.");
+                         }
+                     }
+                }
+
+                if (textToProcess.startsWith('\uFEFF')) {
+                    textToProcess = textToProcess.substring(1);
+                    console.log("Удален BOM.");
+                }
+
+                console.log("CSV перед передачей в XLSX.read (первые 500 символов):\n", textToProcess.substring(0, 500));
+
+                // Используем { raw: false } чтобы библиотека пыталась сама парсить типы
+                // Это может приводить к изменению формата дат, что учтем в parseAndPrepareData
+                workbook = XLSX.read(textToProcess, { type: 'string', raw: false });
+                console.log("CSV успешно прочитан библиотекой XLSX.");
+
+            } else {
+                console.log("Обнаружен XLSX файл. Парсинг...");
+                workbook = XLSX.read(rawFileData, { type: 'binary', cellDates: true });
+            }
+
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            // defval: '' - пустые ячейки станут пустыми строками
+            // raw: false - библиотека попытается определить типы (числа, даты)
+            jsonArr = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+
+            console.log("JSON после парсинга листа библиотекой (первые 5 строк):", JSON.stringify(jsonArr.slice(0, 5), null, 2));
+
+            dataRaw = parseAndPrepareData(jsonArr);
+            console.log(`parseAndPrepareData завершился. ${dataRaw.length} валидных строк обработано.`);
+
+            if (dataRaw.length > 0) {
+                document.getElementById("uploadStatus").textContent = `Загружен: ${file.name} (${dataRaw.length} строк)`;
+                renderMonthFilter();
+                filterData(); // Применяем фильтр (и обновляем селектор сравнения внутри)
+                updateAllCharts();
+            } else {
+                 document.getElementById("uploadStatus").textContent = "Ошибка: Не найдено валидных данных после обработки.";
+                 console.warn("parseAndPrepareData вернул 0 строк. Проверьте структуру файла и логи консоли.");
+                 clearDashboard();
+            }
+        } catch (err) {
+            console.error("Критическая ошибка при обработке файла:", err);
+            console.error("Объект ошибки:", err);
+            alert(`Критическая ошибка при обработке файла: ${err.message}\n\nПроверьте формат файла и его содержимое. Детали в консоли разработчика (F12).`);
+            document.getElementById("uploadStatus").textContent = "Ошибка обработки";
+            clearDashboard();
+        }
+    };
+    reader.onerror = function(e) {
+        console.error("Ошибка FileReader:", e);
+        alert("Не удалось прочитать файл.");
+        document.getElementById("uploadStatus").textContent = "Ошибка чтения";
+        clearDashboard();
+    };
+
+     if (file.name.toLowerCase().endsWith('.csv')) {
+        reader.readAsArrayBuffer(file);
+    } else {
+        reader.readAsBinaryString(file);
+    }
+}
+
+
+function cleanString(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+    let cleaned = String(value).trim();
+    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+        if (cleaned.length > 1) {
+           cleaned = cleaned.substring(1, cleaned.length - 1);
+           cleaned = cleaned.replace(/""/g, '"');
+        } else {
+           cleaned = "";
+        }
+    }
+    return cleaned.trim();
+}
+
+function parseAndPrepareData(json) {
+    if (!json || json.length === 0) {
+        console.log("parseAndPrepareData: Входной JSON пуст.");
+        return [];
+    }
+
+    let startIndex = 0;
+    const firstRow = json[0];
+    // Проверка первой строки на "Итого" или отсутствие валидного дня месяца
+    const firstCellValueClean = cleanString(firstRow ? firstRow[expected_columns[0]] : "");
+    const secondCellValueClean = cleanString(firstRow ? firstRow[expected_columns[1]] : "");
+    const firstDayParsed = parseInt(secondCellValueClean, 10);
+
+    if (firstCellValueClean.toLowerCase().includes("итого") || isNaN(firstDayParsed) || firstDayParsed < 1 || firstDayParsed > 31) {
+        startIndex = 1;
+        console.log("Пропускаем первую строку (похожа на 'Итого' или не содержит валидный день месяца):", JSON.stringify(firstRow));
+    } else {
+        console.log("Первая строка считается данными:", JSON.stringify(firstRow));
+    }
+
+    if (json.length <= startIndex) {
+        console.log("parseAndPrepareData: Нет строк с данными после пропуска заголовка/итогов.");
+        return [];
+    }
+
+    const firstDataRowKeys = Object.keys(json[startIndex]);
+    const missingCols = expected_columns.filter(col => !firstDataRowKeys.includes(col));
+    if (missingCols.length > 0) {
+        alert('Ошибка: В файле отсутствуют необходимые колонки:\n\n' + missingCols.join('\n') + '\n\nПроверьте, что файл содержит все эти заголовки:\n' + expected_columns.join(', '));
+        console.error("Отсутствуют колонки:", missingCols, "Доступные колонки в первой строке данных:", firstDataRowKeys);
+        return [];
+    } else {
+        console.log("Все ожидаемые колонки найдены.");
+    }
+
+    const processedData = [];
+    let skippedRowCount = 0;
+
+    for (let i = startIndex; i < json.length; i++) {
+        const originalRow = json[i];
+        const row = {};
+        let isValidRow = true;
+
+        // Получаем значения из оригинального JSON (могут быть разных типов после парсинга XLSX)
+        const datePartRaw = originalRow["Месяц визита"];
+        const dayOfMonthRaw = originalRow["День месяца визита"];
+        row["День недели визита"] = cleanString(originalRow["День недели визита"]);
+        row["Источник трафика"] = cleanString(originalRow["Источник трафика"]);
+
+        // 1. Валидация и парсинг дня месяца (ключевой момент)
+        const dayOfMonthClean = cleanString(dayOfMonthRaw);
+        const dayOfMonth = parseInt(dayOfMonthClean, 10);
+        if (isNaN(dayOfMonth) || dayOfMonth < 1 || dayOfMonth > 31) {
+            console.warn(`Пропуск строки ${i + 1}: Неверный или отсутствующий 'День месяца визита' (${dayOfMonthRaw}).`);
+            isValidRow = false;
+        }
+
+        // 2. Гибкий парсинг даты из "Месяц визита"
+        let year, month; // Месяц будет 0-индексированный
+        if (isValidRow) {
+             try {
+                let parsedDateFromCol1;
+                // Если это уже объект Date (из XLSX с cellDates:true)
+                if (datePartRaw instanceof Date && !isNaN(datePartRaw)) {
+                    parsedDateFromCol1 = datePartRaw;
+                    console.debug(`Строка ${i + 1}: "Месяц визита" распознан как объект Date: ${parsedDateFromCol1}`);
+                } else {
+                    // Иначе пытаемся парсить как строку (может быть YYYY-MM-DD, M/D/YY, etc.)
+                    const dateString = String(datePartRaw).trim();
+                    if (!dateString) {
+                         throw new Error("Пустое значение в 'Месяц визита'");
+                    }
+                    // Заменяем '-' на '/' для лучшей совместимости с new Date() в разных браузерах
+                    parsedDateFromCol1 = new Date(dateString.replace(/-/g, '/'));
+                     console.debug(`Строка ${i + 1}: Попытка парсинга строки "${dateString}" -> ${parsedDateFromCol1}`);
+                }
+
+                if (isNaN(parsedDateFromCol1.getTime())) {
+                    throw new Error(`Не удалось распознать дату из '${datePartRaw}'`);
+                }
+                // Берем Год и Месяц из распарсенной даты
+                // Используем UTC, чтобы избежать смещений часового пояса
+                year = parsedDateFromCol1.getUTCFullYear();
+                month = parsedDateFromCol1.getUTCMonth(); // Уже 0-индексированный
+
+             } catch (dateParseError) {
+                 console.warn(`Пропуск строки ${i + 1}: Ошибка парсинга даты из колонки 'Месяц визита' (${datePartRaw}). Ошибка: ${dateParseError.message}`);
+                 isValidRow = false;
+             }
+        }
+
+        // 3. Создание финального объекта Date с использованием Года, Месяца (из колонки 1) и Дня (из колонки 2)
+        let dateObj, fullDateISO, monthYear, weekStartDate;
+        if (isValidRow) {
+            try {
+                // Создаем дату строго по UTC компонентам
+                dateObj = new Date(Date.UTC(year, month, dayOfMonth));
+
+                // Финальная проверка валидности созданной даты
+                if (isNaN(dateObj.getTime()) || dateObj.getUTCFullYear() !== year || dateObj.getUTCMonth() !== month || dateObj.getUTCDate() !== dayOfMonth) {
+                     throw new Error(`Некорректная комбинация год=${year}, месяц=${month}, день=${dayOfMonth}`);
+                }
+
+                fullDateISO = dateObj.toISOString().split('T')[0]; // YYYY-MM-DD
+                monthYear = `${year}-${String(month + 1).padStart(2, '0')}`; // YYYY-MM
+                weekStartDate = getWeekStartDate(dateObj).toISOString().split('T')[0]; // YYYY-MM-DD понедельника
+
+                row.fullDate = dateObj;
+                row.fullDateISO = fullDateISO;
+                row.monthYear = monthYear;
+                row.weekStartDate = weekStartDate;
+                // console.debug(`Строка ${i + 1}: Успешно создана дата ${fullDateISO}`);
+
+            } catch (finalDateError) {
+                console.warn(`Пропуск строки ${i + 1}: Ошибка создания финальной даты. Ошибка: ${finalDateError.message}`);
+                isValidRow = false;
+            }
+        }
+
+
+        // 4. Парсинг числовых метрик (без изменений)
+        if (isValidRow) {
+            for (const metric of metricMap) {
+                if (metric.calc) continue;
+
+                const rawValue = originalRow[metric.col];
+                let parsedValue = 0;
+                const cleanedValueStr = String(rawValue).trim().replace(',', '.');
+
+                if (cleanedValueStr !== "" && cleanedValueStr !== null && cleanedValueStr !== undefined) {
+                    parsedValue = parseFloat(cleanedValueStr);
+                    if (isNaN(parsedValue)) {
+                        console.warn(`Строка ${i + 1}, колонка '${metric.col}': Не удалось преобразовать '${rawValue}' в число. Установлено значение 0.`);
+                        parsedValue = 0;
+                    }
+                }
+
+                if (nonNegativeMetrics.includes(metric.col) && parsedValue < 0) {
+                    console.warn(`Строка ${i + 1}, колонка '${metric.col}': Отрицательное значение (${parsedValue}) заменено на 0.`);
+                    parsedValue = 0;
+                }
+                row[metric.col] = parsedValue;
+            }
+        }
+
+        // Добавляем строку, только если все проверки пройдены
+        if (isValidRow) {
+            processedData.push(row);
+        } else {
+            skippedRowCount++;
+        }
+    }
+
+    processedData.sort((a, b) => a.fullDateISO.localeCompare(b.fullDateISO));
+
+    console.log(`parseAndPrepareData: Обработано строк JSON: ${json.length}. Пропущено строк (заголовок/итоги/ошибки): ${skippedRowCount + startIndex}. Добавлено валидных строк: ${processedData.length}.`);
+
+    if (processedData.length > 0) {
+        console.log("Пример первой обработанной строки данных:", JSON.stringify(processedData[0]));
+        console.log("Пример последней обработанной строки данных:", JSON.stringify(processedData[processedData.length - 1]));
+    } else if (json.length > startIndex) {
+        console.warn("Не найдено валидных строк данных после всех проверок.");
+    }
+
+    return processedData;
+}
+
+// --- Остальные функции (filterData, getGroupedData, groupByField, отрисовка, вспомогательные) остаются без изменений ---
+function filterData() {
+    if (selectedMonth) {
+        filteredData = dataRaw.filter(r => r.monthYear === selectedMonth);
+    } else {
+        filteredData = [...dataRaw];
+    }
+    console.log(`Данные отфильтрованы. ${filteredData.length} строк для отображения (Месяц: ${selectedMonth || 'Все'}).`);
+    updateComparePeriodSelector();
+    const compareSelect = document.getElementById('comparePeriodSelect');
+    if (currentCompare === 'prev' && selectedComparePeriod && compareSelect.options.length > 0) {
+        const isValid = Array.from(compareSelect.options).some(opt => opt.value === selectedComparePeriod);
+        if (!isValid) {
+            selectedComparePeriod = compareSelect.options[0] ? compareSelect.options[0].value : "";
+            compareSelect.value = selectedComparePeriod;
+            console.log(`Выбранный ранее период сравнения (${selectedComparePeriod}) стал невалиден, выбран новый: ${selectedComparePeriod}`);
+        }
+    } else if (currentCompare !== 'prev') {
+        selectedComparePeriod = "";
+    }
+}
+
+function getGroupedData(data, granularity, metricConfig) {
+    const grouped = new Map();
+    const getKey = (row) => {
+        switch (granularity) {
+            case 'day':   return row.fullDateISO;
+            case 'week':  return row.weekStartDate;
+            case 'month': return row.monthYear;
+            default:      return null;
+        }
+    };
+    for (const row of data) {
+        const key = getKey(row);
+        if (key === null) continue;
+        let currentValue = grouped.get(key);
+        if (metricConfig.calc) {
+            if (!currentValue) currentValue = [0, 0];
+            const [num, den] = metricConfig.calc(row);
+            currentValue[0] += isNaN(num) ? 0 : num;
+            currentValue[1] += isNaN(den) ? 0 : den;
+        } else {
+            if (!currentValue) currentValue = 0;
+            const val = row[metricConfig.col] || 0;
+            currentValue += isNaN(val) ? 0 : val;
+        }
+        grouped.set(key, currentValue);
+    }
+    let result = Array.from(grouped.entries()).map(([key, value]) => {
+        if (metricConfig.calc) {
+            const numerator = value[0];
+            const denominator = value[1];
+            return {
+                key,
+                y: denominator !== 0 ? numerator / denominator : 0,
+                numerator,
+                denominator
+            };
+        } else {
+            return { key, y: value };
+        }
+    });
+    result.sort((a, b) => a.key.localeCompare(b.key));
+    return result;
+}
+
+function groupByField(data, field, metricConfig) {
+    const groups = {};
+    for (const row of data) {
+        let key = row[field] || "Не указан";
+        if (key === "") key = "Не указан";
+        if (!groups[key]) {
+            groups[key] = metricConfig.calc ? [0, 0] : 0;
+        }
+        if (metricConfig.calc) {
+            const [num, den] = metricConfig.calc(row);
+            groups[key][0] += isNaN(num) ? 0 : num;
+            groups[key][1] += isNaN(den) ? 0 : den;
+        } else {
+            const val = row[metricConfig.col] || 0;
+            groups[key] += isNaN(val) ? 0 : val;
+        }
+    }
+    return Object.entries(groups).map(([key, value]) => {
+        if (metricConfig.calc) {
+            const numerator = value[0];
+            const denominator = value[1];
+            return {
+                key,
+                value: denominator !== 0 ? numerator / denominator : 0
+            };
+        } else {
+            return { key, value };
+        }
+    });
+}
+
+function updateAllCharts() {
+    console.log("--- Запуск updateAllCharts ---");
+    if (dataRaw.length === 0) {
+        console.log("updateAllCharts: Нет сырых данных для отрисовки.");
+        return;
+    }
+    if (filteredData.length === 0) {
+        console.log("updateAllCharts: Нет отфильтрованных данных для выбранных критериев.");
+        const msg = selectedMonth
+            ? `Нет данных для выбранного месяца (${formatMonthYear(selectedMonth)}).`
+            : "Нет данных, удовлетворяющих фильтру.";
+        document.getElementById('kpi-cards').innerHTML = `<div class="empty-warn">${msg}</div>`;
+        document.getElementById('byDynamic').innerHTML = `<div class="empty-warn">${msg}</div>`;
+        document.getElementById('byDynamicSmooth').innerHTML = '';
+        document.getElementById('bySource').innerHTML = `<div class="empty-warn">${msg}</div>`;
+        document.getElementById('byWeekday').innerHTML = `<div class="empty-warn">${msg}</div>`;
+        return;
+    }
+    console.log(`updateAllCharts: Отрисовка с ${filteredData.length} строками.`);
+    try { renderKPI(); } catch (e) { console.error("Ошибка в renderKPI:", e); document.getElementById('kpi-cards').innerHTML = '<div class="empty-warn">Ошибка при расчете KPI.</div>'; }
+    try { renderDynamics(); } catch (e) { console.error("Ошибка в renderDynamics:", e); document.getElementById('byDynamic').innerHTML = '<div class="empty-warn">Ошибка при построении графика динамики.</div>'; document.getElementById('byDynamicSmooth').innerHTML = ''; }
+    try { plotSourcePie(); } catch (e) { console.error("Ошибка в plotSourcePie:", e); document.getElementById('bySource').innerHTML = '<div class="empty-warn">Ошибка при построении диаграммы источников.</div>'; }
+    try { plotWeekdayPie(); } catch (e) { console.error("Ошибка в plotWeekdayPie:", e); document.getElementById('byWeekday').innerHTML = '<div class="empty-warn">Ошибка при построении диаграммы дней недели.</div>'; }
+    console.log("--- Завершение updateAllCharts ---");
+}
+
+function renderKPI() {
+    const kpiDiv = document.getElementById('kpi-cards');
+    kpiDiv.innerHTML = "";
+    if (filteredData.length === 0) return;
+    let compareDataTotals = null;
+    if (currentCompare === 'prev' && selectedComparePeriod) {
+        const comparePeriodData = dataRaw.filter(r => {
+            const keyField = currentGran === 'day' ? 'fullDateISO' : (currentGran === 'week' ? 'weekStartDate' : 'monthYear');
+            return r[keyField] === selectedComparePeriod;
+        });
+        if(comparePeriodData.length > 0) {
+            compareDataTotals = {};
+            metricMap.forEach(m => {
+                let totalValue = 0;
+                let numerator = 0, denominator = 0;
+                if (m.calc) {
+                    comparePeriodData.forEach(row => {
+                        const [n, d] = m.calc(row);
+                        numerator += (isNaN(n)?0:n);
+                        denominator += (isNaN(d)?0:d);
+                    });
+                    totalValue = denominator !== 0 ? numerator / denominator : 0;
+                } else {
+                    totalValue = comparePeriodData.reduce((sum, r) => {
+                         const val = r[m.col];
+                         return sum + ((isNaN(val) || val === null || val === undefined) ? 0 : Number(val));
+                     }, 0);
+                }
+                 compareDataTotals[m.col] = { value: totalValue, num: numerator, den: denominator };
+            });
+            console.log(`Данные для сравнения KPI (период ${selectedComparePeriod}):`, compareDataTotals);
+        } else {
+            console.log(`Нет данных для сравнения KPI за период ${selectedComparePeriod}.`);
+        }
+    }
+    metricMap.forEach(m => {
+        let mainValue = 0;
+        let numerator = 0, denominator = 0;
+        let compareValue = null;
+        let diffPercent = null;
+        if (m.calc) {
+            filteredData.forEach(r => {
+                const [num, den] = m.calc(r);
+                numerator += isNaN(num) ? 0 : num;
+                denominator += isNaN(den) ? 0 : den;
+            });
+            mainValue = denominator !== 0 ? numerator / denominator : 0;
+        } else {
+             mainValue = filteredData.reduce((sum, r) => {
+                 const val = r[m.col];
+                 return sum + ((isNaN(val) || val === null || val === undefined) ? 0 : Number(val));
+             }, 0);
+        }
+        if (compareDataTotals && compareDataTotals[m.col] !== undefined) {
+            compareValue = compareDataTotals[m.col].value;
+            if (compareValue !== null && compareValue !== 0) {
+                diffPercent = ((mainValue - compareValue) / compareValue) * 100;
+            } else if (mainValue !== 0) {
+                diffPercent = Infinity;
+            } else {
+                diffPercent = 0;
+            }
+        }
+        const card = document.createElement('div');
+        card.className = 'kpi-card' + (currentMetricCol === m.col ? " kpi-active" : "");
+        card.onclick = () => { currentMetricCol = m.col; updateAllCharts(); };
+        let displayValue = m.percent ? (mainValue * 100).toFixed(1) + '%' : numFmt(mainValue);
+        let helpText = m.help || '';
+        if (m.calc && denominator > 0) {
+            helpText += ` (${numFmt(numerator)} / ${numFmt(denominator)})`;
+        }
+        let compareHtml = '';
+        if (compareValue !== null) {
+            let compareDisplay = m.percent ? (compareValue * 100).toFixed(1) + '%' : numFmt(compareValue);
+            let diffSign = diffPercent > 0 ? '+' : '';
+            let diffColor = diffPercent > 0 ? 'green' : (diffPercent < 0 ? 'red' : 'grey');
+            let diffText = '0%';
+            if (!isFinite(diffPercent) && mainValue > 0) {
+                diffText = '+∞';
+                diffColor = 'green';
+            } else if (isFinite(diffPercent) && Math.abs(diffPercent) > 0.01) {
+                 diffText = `${diffSign}${diffPercent.toFixed(0)}%`;
+            }
+            compareHtml = `<div class="kpi-compare" style="color:${diffColor};">(${diffText}) vs ${compareDisplay}</div>`;
+        }
+        card.innerHTML = `
+            <div class="kpi-name">${m.name}</div>
+            <div class="kpi-main">${displayValue}</div>
+            ${compareHtml}
+            <div class="kpi-help">${helpText}</div>`;
+        kpiDiv.appendChild(card);
+    });
+}
+
+function renderMonthFilter() {
+    const months = Array.from(new Set(dataRaw.map(r => r.monthYear))).sort();
+    const sel = document.getElementById('monthFilter');
+    sel.innerHTML = "";
+    if (months.length > 1) {
+        sel.style.display = '';
+        sel.innerHTML = "<option value=''>Все месяцы</option>";
+        sel.innerHTML += months.map(m => `<option value="${m}">${formatMonthYear(m)}</option>`).join('');
+        if (months.includes(selectedMonth)) { sel.value = selectedMonth; }
+        else { selectedMonth = ""; sel.value = ""; }
+    } else {
+        sel.style.display = 'none';
+        selectedMonth = ""; sel.value = "";
+    }
+}
+
+function updateComparePeriodSelector() {
+    const compareSelect = document.getElementById('comparePeriodSelect');
+    if (currentCompare !== 'prev' || dataRaw.length === 0) {
+        compareSelect.style.display = 'none'; compareSelect.disabled = true; selectedComparePeriod = ""; compareSelect.innerHTML = ''; return;
+    }
+    const allPeriodKeys = Array.from(new Set(dataRaw.map(r => {
+        switch (currentGran) {
+            case 'day':   return r.fullDateISO;
+            case 'week':  return r.weekStartDate;
+            case 'month': return r.monthYear;
+            default:      return null;
+        }
+    }))).filter(Boolean).sort();
+    let currentActiveKey = null;
+    if (selectedMonth && currentGran === 'month') { currentActiveKey = selectedMonth; }
+    let availablePeriods = allPeriodKeys.filter(p => p !== currentActiveKey);
+    if (availablePeriods.length > 0) {
+        compareSelect.style.display = ''; compareSelect.disabled = false;
+        compareSelect.innerHTML = availablePeriods.map(p => `<option value="${p}">${formatPeriodKey(p, currentGran)}</option>`).join('');
+        if (availablePeriods.includes(selectedComparePeriod)) { compareSelect.value = selectedComparePeriod; }
+        else { compareSelect.value = availablePeriods[availablePeriods.length - 1]; selectedComparePeriod = compareSelect.value; }
+    } else {
+        compareSelect.style.display = ''; compareSelect.innerHTML = '<option value="">Нет периодов для сравнения</option>'; compareSelect.disabled = true; selectedComparePeriod = "";
+    }
+    console.log(`Селектор сравнения обновлен. Доступно ${availablePeriods.length} периодов. Выбран: '${selectedComparePeriod}'`);
+}
+
+function renderDynamics() {
+    const dynamicPlotDiv = document.getElementById('byDynamic');
+    const smoothPlotDiv = document.getElementById('byDynamicSmooth');
+    dynamicPlotDiv.innerHTML = ''; smoothPlotDiv.innerHTML = '';
+    const metricConfig = metricMap.find(m => m.col === currentMetricCol);
+    if (!metricConfig || filteredData.length === 0) { dynamicPlotDiv.innerHTML = '<div class="empty-warn">Нет данных для построения графика динамики.</div>'; return; }
+    const grouped = getGroupedData(filteredData, currentGran, metricConfig);
+    if (grouped.length === 0) { dynamicPlotDiv.innerHTML = '<div class="empty-warn">Нет сгруппированных данных для динамики.</div>'; return; }
+    const xValuesKeys = grouped.map(r => r.key);
+    const yValues = grouped.map(r => r.y);
+    const labels = xValuesKeys.map(key => formatPeriodKey(key, currentGran));
+    const plotTraces = [{ x: labels, y: yValues, mode: 'lines+markers', marker: { color: '#2986fa', size: 5 }, line: { shape: 'spline', width: 2, color: '#2986fa' }, name: 'Текущий период', hovertemplate: `<b>%{x}</b><br>${metricConfig.name}: %{y:,.${metricConfig.percent ? '1f' : '0f'}}${metricConfig.percent ? '%' : ''}<extra></extra>` }];
+    if (currentCompare === 'prev' && selectedComparePeriod) {
+         const comparePeriodData = dataRaw.filter(r => {
+            const keyField = currentGran === 'day' ? 'fullDateISO' : (currentGran === 'week' ? 'weekStartDate' : 'monthYear');
+            return r[keyField] === selectedComparePeriod;
+         });
+        if (comparePeriodData.length > 0) {
+            const compareGrouped = getGroupedData(comparePeriodData, currentGran, metricConfig);
+            if (compareGrouped.length > 0) {
+                let yCompareAligned = new Array(labels.length).fill(null);
+                const mainKeysIndexMap = new Map(xValuesKeys.map((key, index) => [key, index]));
+                compareGrouped.forEach(compareItem => {
+                    const index = mainKeysIndexMap.get(compareItem.key);
+                    if (index !== undefined) { yCompareAligned[index] = compareItem.y; }
+                });
+                plotTraces.push({ x: labels, y: yCompareAligned, mode: 'lines', line: { color: '#ffab00', dash: 'dash', width: 1.8 }, name: `Сравн.: ${formatPeriodKey(selectedComparePeriod, currentGran)}`, connectgaps: false, hovertemplate: `<b>%{x}</b><br>Сравн.: %{y:,.${metricConfig.percent ? '1f' : '0f'}}${metricConfig.percent ? '%' : ''}<extra></extra>` });
+            }
+        }
+    }
+    if (grouped.length >= 2) {
+        try {
+            const points = yValues.map((y, i) => [i, y]).filter(p => p[1] !== null && !isNaN(p[1]) && isFinite(p[1]));
+            if (points.length >= 2) {
+                const regression = ss.linearRegression(points);
+                const regressionLine = ss.linearRegressionLine(regression);
+                const trendY = labels.map((_, i) => regressionLine(i));
+                plotTraces.push({ x: labels, y: trendY, mode: 'lines', line: { color: '#e41a1c', dash: 'dot', width: 1.5 }, name: 'Тренд', hoverinfo: 'skip' });
+            }
+        } catch (e) { console.error("Ошибка расчета основного тренда:", e); }
+    }
+    const layout = { margin: { t: 25, r: 25, b: (grouped.length > 15 ? 60 : 40), l: 60, pad: 4 }, yaxis: { title: {text: metricAxisLabel(metricConfig), standoff: 15}, zeroline: false, gridcolor: '#eef2f7', hoverformat: metricConfig.percent ? '.1%' : ',.0f' }, xaxis: { gridcolor: '#f5f8fb', type: 'category', tickangle: grouped.length > 15 ? -45 : 0 }, height: 300, hovermode: 'x unified', legend: { orientation: "h", yanchor: "bottom", y: 1.02, xanchor: "right", x: 1 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)' };
+    try { Plotly.newPlot(dynamicPlotDiv, plotTraces, layout, { displayModeBar: false, responsive: true }); } catch (plotlyErr) { console.error("Ошибка Plotly при отрисовке основного графика динамики:", plotlyErr); dynamicPlotDiv.innerHTML = '<div class="empty-warn">Ошибка отрисовки графика динамики.</div>'; }
+    if (currentGran === 'day' && grouped.length >= 7) {
+        const windowSize = 7;
+        const smoothedY = smoothMA(yValues, windowSize);
+        const smoothTraces = [{ x: labels, y: smoothedY, mode: 'lines', line: { shape: 'spline', width: 2, color: '#4daf4a' }, name: `Ср. скольз. (${windowSize} дн.)`, hovertemplate: `<b>%{x}</b><br>Среднее: %{y:,.${metricConfig.percent ? '1f' : '0f'}}${metricConfig.percent ? '%' : ''}<extra></extra>` }];
+        try {
+            const smoothPoints = smoothedY.map((y, i) => [i, y]).filter(p => p[1] !== null && !isNaN(p[1]) && isFinite(p[1]));
+            if (smoothPoints.length >= 2) {
+                const smoothRegression = ss.linearRegression(smoothPoints);
+                const smoothRegressionLine = ss.linearRegressionLine(smoothRegression);
+                const smoothTrendY = labels.map((_, i) => smoothRegressionLine(i));
+                smoothTraces.push({ x: labels, y: smoothTrendY, mode: 'lines', line: { color: '#984ea3', dash: 'dot', width: 1.5 }, name: 'Тренд (сглаж.)', hoverinfo: 'skip' });
+            }
+        } catch(e) { console.error("Ошибка расчета сглаженного тренда:", e); }
+        const smoothLayout = JSON.parse(JSON.stringify(layout));
+        smoothLayout.yaxis.title.text = metricAxisLabel(metricConfig) + ` (сглаж. ${windowSize} дн.)`;
+        smoothLayout.height = 250;
+        try { Plotly.newPlot(smoothPlotDiv, smoothTraces, smoothLayout, { displayModeBar: false, responsive: true }); } catch (plotlyErr) { console.error("Ошибка Plotly при отрисовке сглаженного графика:", plotlyErr); smoothPlotDiv.innerHTML = '<div class="empty-warn">Ошибка отрисовки сглаженного графика.</div>'; }
+    } else if (currentGran !== 'day') { smoothPlotDiv.innerHTML = '<div class="empty-warn" style="padding-top: 20px;">Сглаженный график доступен только для дневной гранулярности.</div>'; }
+    else { smoothPlotDiv.innerHTML = ''; }
+}
+
+function smoothMA(arr, windowSize = 7) {
+    if (windowSize <= 0 || !arr || arr.length === 0) return [];
+    let result = []; let currentSum = 0; let currentCount = 0; const windowData = [];
+    for (let i = 0; i < arr.length; i++) {
+        const val = arr[i]; const isNum = (val !== null && !isNaN(val) && isFinite(val)); windowData.push(isNum ? val : null);
+        if (isNum) { currentSum += val; currentCount++; }
+        if (windowData.length > windowSize) { const removedVal = windowData.shift(); if (removedVal !== null) { currentSum -= removedVal; currentCount--; } }
+        result.push(currentCount > 0 ? currentSum / currentCount : 0);
+    } return result;
+}
+
+function plotSourcePie() {
+    const plotDiv = document.getElementById('bySource'); plotDiv.innerHTML = '';
+    const metricConfig = metricMap.find(m => m.col === currentMetricCol);
+    if (!metricConfig || filteredData.length === 0) { plotDiv.innerHTML = '<div class="empty-warn">Нет данных для диаграммы источников.</div>'; return; }
+    let grouped = groupByField(filteredData, "Источник трафика", metricConfig);
+    grouped = grouped.filter(item => item.value > 0);
+    if (grouped.length === 0) { plotDiv.innerHTML = '<div class="empty-warn">Нет данных по источникам для выбранной метрики.</div>'; return; }
+    grouped.sort((a, b) => b.value - a.value);
+    const thresholdPercent = 2; const totalValue = grouped.reduce((sum, item) => sum + item.value, 0);
+    let labels = []; let values = []; let otherValue = 0; const maxSlices = 8;
+    if (totalValue > 0) {
+        grouped.forEach(item => { if ((item.value / totalValue) * 100 >= thresholdPercent || labels.length < maxSlices) { labels.push(item.key); values.push(item.value); } else { otherValue += item.value; } });
+        if (otherValue > 0) { const otherPercent = (otherValue / totalValue) * 100; let inserted = false; for (let i = 0; i < values.length; i++) { if ((values[i] / totalValue) * 100 < otherPercent) { labels.splice(i, 0, "Другие"); values.splice(i, 0, otherValue); inserted = true; break; } } if (!inserted) { labels.push("Другие"); values.push(otherValue); } }
+    } else { labels = grouped.map(item => item.key); values = grouped.map(item => item.value); }
+    if (labels.length === 0) { plotDiv.innerHTML = '<div class="empty-warn">Нет данных для построения диаграммы источников.</div>'; return; }
+    const plotData = [{ type: "pie", labels: labels, values: values, marker: { line: { color: '#fff', width: 1 } }, hole: .4, textinfo: 'percent', hoverinfo: 'label+value+percent', hovertemplate: `<b>%{label}</b><br>Значение: %{value:,.${metricConfig.percent ? '1f' : '0f'}}${metricConfig.percent ? '%' : ''}<br>Доля: %{percent}<extra></extra>`, automargin: true, textposition: 'inside', insidetextorientation: 'radial', pull: 0.02 }];
+    const layout = { showlegend: true, legend: { orientation: "v", yanchor: "top", y: 0.95, xanchor: "right", x: 1.2 }, margin: { l: 10, r: 140, b: 10, t: 10, pad: 2 }, height: 300, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)' };
+    try { Plotly.newPlot(plotDiv, plotData, layout, { displayModeBar: false, responsive: true }); } catch (plotlyErr) { console.error("Ошибка Plotly при отрисовке диаграммы источников:", plotlyErr); plotDiv.innerHTML = '<div class="empty-warn">Ошибка отрисовки диаграммы источников.</div>'; }
+}
+
+function plotWeekdayPie() {
+    const plotDiv = document.getElementById('byWeekday'); plotDiv.innerHTML = '';
+    const metricConfig = metricMap.find(m => m.col === currentMetricCol);
+    if (!metricConfig || filteredData.length === 0) { plotDiv.innerHTML = '<div class="empty-warn">Нет данных для диаграммы дней недели.</div>'; return; }
+    let grouped = groupByField(filteredData, "День недели визита", metricConfig);
+    grouped = grouped.filter(item => item.value > 0 || metricConfig.calc);
+    if (grouped.length === 0) { plotDiv.innerHTML = '<div class="empty-warn">Нет данных по дням недели для выбранной метрики.</div>'; return; }
+    grouped.sort((a, b) => (weekdaysOrder[a.key] || 99) - (weekdaysOrder[b.key] || 99));
+    const labels = grouped.map(item => item.key); const values = grouped.map(item => item.value);
+    if (labels.length === 0) { plotDiv.innerHTML = '<div class="empty-warn">Нет данных для построения диаграммы дней недели.</div>'; return; }
+    const plotData = [{ type: "pie", labels: labels, values: values, marker: { line: { color: '#fff', width: 1 } }, hole: .4, textinfo: 'percent', hoverinfo: 'label+value+percent', hovertemplate: `<b>%{label}</b><br>Значение: %{value:,.${metricConfig.percent ? '1f' : '0f'}}${metricConfig.percent ? '%' : ''}<br>Доля: %{percent}<extra></extra>`, sort: false, automargin: true, textposition: 'inside', insidetextorientation: 'radial', pull: 0.02 }];
+    const layout = { showlegend: true, legend: { orientation: "v", yanchor: "top", y: 0.95, xanchor: "right", x: 1.2 }, margin: { l: 10, r: 140, b: 10, t: 10, pad: 2 }, height: 300, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)' };
+    try { Plotly.newPlot(plotDiv, plotData, layout, { displayModeBar: false, responsive: true }); } catch (plotlyErr) { console.error("Ошибка Plotly при отрисовке диаграммы дней недели:", plotlyErr); plotDiv.innerHTML = '<div class="empty-warn">Ошибка отрисовки диаграммы дней недели.</div>'; }
+}
+
+// --- Вспомогательные функции ---
+function numFmt(x) {
+     if (x === null || x === undefined || isNaN(x)) return '0';
+     const isSmallNonInteger = (Math.abs(x) > 0 && Math.abs(x) < 100 && x % 1 !== 0);
+     const fixed = isSmallNonInteger ? 1 : 0;
+     try { return x.toLocaleString('ru-RU', { minimumFractionDigits: fixed, maximumFractionDigits: fixed }); }
+     catch (e) { return String(x.toFixed(fixed)); }
+}
+function getWeekStartDate(date) {
+    const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    const dayOfWeekUTC = d.getUTCDay();
+    const diff = d.getUTCDate() - dayOfWeekUTC + (dayOfWeekUTC === 0 ? -6 : 1);
+    d.setUTCDate(diff);
+    return d;
+}
+function formatPeriodKey(key, granularity) {
+    if (!key) return String(key);
+    try {
+        switch (granularity) {
+            case 'day': const dayDate = new Date(key + 'T00:00:00Z'); return dayDate.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', timeZone: 'UTC' });
+            case 'week': const weekDate = new Date(key + 'T00:00:00Z'); return `Нед. ${getISOWeek(weekDate)} (${weekDate.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', timeZone: 'UTC' })})`;
+            case 'month': return formatMonthYear(key);
+            default: return key;
+        }
+    } catch(e) { console.error("Ошибка форматирования ключа периода:", key, granularity, e); return key; }
+}
+function formatMonthYear(yyyyMM) {
+    if (!/^\d{4}-\d{2}$/.test(yyyyMM)) return yyyyMM;
+    const [year, month] = yyyyMM.split('-');
+    try { const date = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1)); return date.toLocaleDateString('ru-RU', { month: 'short', year: 'numeric', timeZone: 'UTC' }); }
+    catch (e) { console.error("Ошибка форматирования месяца/года:", yyyyMM, e); return yyyyMM; }
+}
+function getISOWeek(date) {
+    const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return weekNo;
+}
+function metricAxisLabel(metricConfig) {
+    if (!metricConfig) return "";
+    return metricConfig.name + (metricConfig.percent ? ", %" : "");
+}
+
+</script>
+
+</body>
+</html>
